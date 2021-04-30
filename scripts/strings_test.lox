@@ -1,0 +1,13 @@
+// Testing good and bad strings
+
+"" // Empty string
+
+"hello" // Single line string
+
+"hello world!" // Single line string with whitespace
+
+"Multi
+Line
+String"
+
+"Unterminated string

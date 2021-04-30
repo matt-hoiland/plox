@@ -1,0 +1,6 @@
+10 // integer
+0.01 // percent
+3.14 // fractional
+
+.001 // invalid fractional
+10. // invalid integer
