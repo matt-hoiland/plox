@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 
-from lox.shell import Shell
+import lox.shell
+import sys
 
 
 def main():
-    print('Hello world!')
-    Shell().run()
+    errno = lox.shell.main(sys.argv[1:])
+    sys.exit(errno)
 
 
 if __name__ == '__main__':
