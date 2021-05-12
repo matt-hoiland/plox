@@ -79,3 +79,47 @@ def test_unexpected_character():
     assert len(tokens) == 1
     assert "Unexpected" in sys.stderr.getvalue()
     assert Errors.had_error
+
+
+def test_numbers_happy():
+    scanner = Scanner('123 123.0 123. .456 789.')
+    received_tokens = scanner.scan_tokens()
+
+    expected_tokens = [
+        Token(TokenType.NUMBER, "123", 123, 1),
+        Token(TokenType.NUMBER, "123.0", 123.0, 1),
+        Token(TokenType.NUMBER, "123", 123, 1),
+        Token(TokenType.DOT, ".", None, 1),
+        Token(TokenType.DOT, ".", None, 1),
+        Token(TokenType.NUMBER, "456", 456, 1),
+        Token(TokenType.NUMBER, "789", 789, 1),
+        Token(TokenType.DOT, ".", None, 1),
+        Token(TokenType.EOF, "", None, 1),
+    ]
+
+    assert len(received_tokens) == len(expected_tokens)
+
+    for received, expected in zip(received_tokens, expected_tokens):
+        assert received == expected
+
+
+def test_identifiers_happy():
+    scanner = Scanner('_ _happy happy super bowl or superb owl')
+    received_tokens = scanner.scan_tokens()
+
+    expected_tokens = [
+        Token(TokenType.IDENTIFIER, "_", None, 1),
+        Token(TokenType.IDENTIFIER, "_happy", None, 1),
+        Token(TokenType.IDENTIFIER, "happy", None, 1),
+        Token(TokenType.SUPER, "super", None, 1),
+        Token(TokenType.IDENTIFIER, "bowl", None, 1),
+        Token(TokenType.OR, "or", None, 1),
+        Token(TokenType.IDENTIFIER, "superb", None, 1),
+        Token(TokenType.IDENTIFIER, "owl", None, 1),
+        Token(TokenType.EOF, "", None, 1),
+    ]
+
+    assert len(received_tokens) == len(expected_tokens)
+
+    for received, expected in zip(received_tokens, expected_tokens):
+        assert received == expected

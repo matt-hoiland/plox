@@ -1,5 +1,5 @@
 from lox.tokentype import TokenType
-from typing import List
+from typing import Dict, List
 
 from lox.token import Token
 from lox.errors import Errors
@@ -7,6 +7,26 @@ from lox.errors import Errors
 
 class UnimplementedError(RuntimeError):
     pass
+
+
+keywords: Dict[str, TokenType] = {
+    "and": TokenType.AND,
+    "class": TokenType.CLASS,
+    "else": TokenType.ELSE,
+    "false": TokenType.FALSE,
+    "for": TokenType.FOR,
+    "fun": TokenType.FUN,
+    "if": TokenType.IF,
+    "nil": TokenType.NIL,
+    "or": TokenType.OR,
+    "print": TokenType.PRINT,
+    "return": TokenType.RETURN,
+    "super": TokenType.SUPER,
+    "this": TokenType.THIS,
+    "true": TokenType.TRUE,
+    "var": TokenType.VAR,
+    "while": TokenType.WHILE,
+}
 
 
 class Scanner:
@@ -32,8 +52,26 @@ class Scanner:
         self._current += 1
         return c
 
+    def __identifier_case(self):
+        while self._is_alpha_numeric(self._peek()):
+            self._advance()
+
+        text = self._source[self._start:self._current]
+        type = keywords.get(text, TokenType.IDENTIFIER)
+
+        self._add_token(type)
+
+    def _is_alpha(self, c: str) -> bool:
+        return c.isalpha() or c == "_"
+
+    def _is_alpha_numeric(self, c: str) -> bool:
+        return self._is_alpha(c) or self._is_digit(c)
+
     def _is_at_end(self) -> bool:
         return self._current >= len(self._source)
+
+    def _is_digit(self, c: str) -> bool:
+        return c in "0123456789"
 
     def _match(self, expected: str) -> bool:
         if self._is_at_end():
@@ -44,10 +82,28 @@ class Scanner:
         self._current += 1
         return True
 
+    def __number_case(self):
+        while self._is_digit(self._peek()):
+            self._advance()
+
+        # Look for a fractional part.
+        if self._peek() == "." and self._is_digit(self._peek_next()):
+            self._advance()
+            while self._is_digit(self._peek()):
+                self._advance()
+
+        self._add_token(TokenType.NUMBER, float(
+            self._source[self._start:self._current]))
+
     def _peek(self) -> str:
         if self._is_at_end():
             return "\0"
         return self._source[self._current]
+
+    def _peek_next(self) -> str:
+        if self._current + 1 >= len(self._source):
+            return "\0"
+        return self._source[self._current + 1]
 
     def _scan_token(self):
         c = self._advance()
@@ -75,6 +131,12 @@ class Scanner:
             return
         if c == "\n":
             self._line += 1
+            return
+        if self._is_digit(c):
+            self.__number_case()
+            return
+        if self._is_alpha(c):
+            self.__identifier_case()
             return
         if c not in cases:
             Errors.error(self._line, "Unexpected character.")
